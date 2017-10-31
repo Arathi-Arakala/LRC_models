@@ -1,0 +1,52 @@
+
+###### top matter
+setwd("H:/R/KoiHerpes/Model2")
+library(deSolve); library(readxl)
+source("H:/R/KoiHerpes/Model2/function_library.R")
+
+###### Choose the zone of the Lachlan Catchment: can be a number from 1-8
+zone<-5
+
+###### set strength of density dependence
+strength <- 1e-10
+
+###### set severity of impact of shrinking wetland on survival or age0-2 fish
+q <- 2
+
+###### set the Leslie matrix
+L=matrix(c(0, 0, 80, 131, 225, 
+           0.25, 0, 0, 0, 0, 
+           0, 0.5, 0, 0, 0, 
+           0, 0, 0.53, 0, 0,
+           0, 0, 0, 0.8, 0.75), nrow=5, ncol=5, byrow=TRUE) 
+
+###### set up the parameters, initial population size and wetland time series
+source("H:/R/KoiHerpes/Model2/model2setup.R")
+###### Choose the time scale over which you want to run the model
+T <- 1                                             ## w_t repeats T times: T = 1 --> run from January 1994- December 2013 
+wetland <- rep(w_t, times=T)                       ## repeat the spawning_suit vector to get a much longer time series
+runtime <- length(wetland)                         ## i.e. T=5 should be 100 years
+
+###### inflate initial population size
+#init <- 10*init
+
+########### No virus ##########
+####### Just Demography #######
+
+#start on May 1st 1994: May 1st is the `birthday' of ALL fish not just this first cohort of 6-week fish (Age 0)
+year <- 1994
+output_discrete<-numeric()
+output_all<-numeric()
+
+#solve the differential equations
+source("H:/R/KoiHerpes/Model2/solve.R")
+
+#visualise dynamics and behaviour
+source("H:/R/KoiHerpes/Model2/visualise.R")
+
+
+
+
+
+
+
