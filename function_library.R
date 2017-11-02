@@ -69,5 +69,3 @@ demography_5classes<-function(t, init, parms) {
   })
 }
 
-
-

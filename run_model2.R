@@ -1,8 +1,8 @@
 
 ###### top matter
-setwd("H:/R/KoiHerpes/Model2")
+setwd("/Users/Arathi/Documents/2017/RMIT/Research - CARP/CARP/LRC_models")
 library(deSolve); library(readxl)
-source("H:/R/KoiHerpes/Model2/function_library.R")
+source("function_library.R")
 
 ###### Choose the zone of the Lachlan Catchment: can be a number from 1-8
 zone<-5
@@ -21,7 +21,7 @@ L=matrix(c(0, 0, 80, 131, 225,
            0, 0, 0, 0.8, 0.75), nrow=5, ncol=5, byrow=TRUE) 
 
 ###### set up the parameters, initial population size and wetland time series
-source("H:/R/KoiHerpes/Model2/model2setup.R")
+source("model2setup.R")
 ###### Choose the time scale over which you want to run the model
 T <- 1                                             ## w_t repeats T times: T = 1 --> run from January 1994- December 2013 
 wetland <- rep(w_t, times=T)                       ## repeat the spawning_suit vector to get a much longer time series
@@ -39,10 +39,10 @@ output_discrete<-numeric()
 output_all<-numeric()
 
 #solve the differential equations
-source("H:/R/KoiHerpes/Model2/solve.R")
+source("solve.R")
 
 #visualise dynamics and behaviour
-source("H:/R/KoiHerpes/Model2/visualise.R")
+source("visualise.R")
 
 
 

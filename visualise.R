@@ -1,4 +1,4 @@
-windows()
+quartz()
 plot(1994.333+output_all$time/365, rowSums(output_all[5:6]), type="l", lwd=2, col=1, main=c("Sub-catchment Prediction Zone ",zone), ylab="", xlab="year", ylim=c(0,800000))
 lines(1994.333+output_all$time/365, (output_all$A_0)/100, type="l", col=3)#, main="Juveniles", ylab="Juvenile Fish", xlab="Year")
 
