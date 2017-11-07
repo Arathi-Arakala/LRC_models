@@ -39,10 +39,11 @@ for(z in 1:8){
   time<-1:length(data_A$ddate)
   
   # 2. Read in W_z_t
+  RiverArea_hectares<-c(839, 1703, 0, 1312, 492, 0, 85, 410)
   inputfile<-paste("BBN_Data/BBN_w_zt.xlsx", sep="")
   data_W<-as.data.frame(read_excel(inputfile, sheet = 1, col_names = TRUE, col_types = NULL, na = "", skip = 0))
   data_W_zone<-data_W[which(data_W$zone==z),]
-  W_zone<-data_W_zone$p_wetland_area+data_W_zone$s_wetland_area+10
+  W_zone<-(data_W_zone$p_wetland_area/4)+(data_W_zone$s_wetland_area/4)+(0.05*RiverArea_hectares[z])
   
   #creating a monthly w_zone where the year value is duplicated for all months in the year
   w_zone_monthly<-numeric()
