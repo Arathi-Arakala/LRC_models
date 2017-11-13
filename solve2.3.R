@@ -21,10 +21,8 @@ for(k in 2:(runtime-1)){     ##Note we start k at 2 as that corresponds to 1994.
 
   
   # calculate sensitivity, the scaling factor for strength of density dependence
-  if(BBN_input_demogModel$A_z_t[k]==0)
-    sensitivity<-50
-  if(BBN_input_demogModel$A_z_t[k]>0)
-    sensitivity<-sum(init[-1])/BBN_input_demogModel$A_z_t[k]
+  
+    sensitivity<-sum(init[-1])/(BBN_input_demogModel$A_z_t[k]+1)
   
     
     

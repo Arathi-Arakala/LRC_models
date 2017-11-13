@@ -21,7 +21,7 @@ for(z in 1:8){
              0.25, 0, 0, 0, 0, 
              0, 0.5, 0, 0, 0, 
              0, 0, 0.53, 0, 0,
-             0, 0, 0, 0.8, 0.75), nrow=5, ncol=5, byrow=TRUE) 
+             0, 0, 0, 0.8, 0.8), nrow=5, ncol=5, byrow=TRUE) 
   
   ###### set up the parameters, initial population size and wetland time series
   
