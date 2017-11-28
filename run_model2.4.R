@@ -80,7 +80,6 @@ for(k in 2:(runtime-1) ){ #(runtime-1)    ##Note we start k at 2 as that corresp
     output_all<-numeric() 
     
     #solve the differential equations, update output_all
-    init<-init_allZones[z,]
     source("solve2.4.R")
     
     output_all_zones[z, , ]<-as.matrix(output_all)
