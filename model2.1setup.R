@@ -43,7 +43,7 @@ inputfile<-paste("BBN_Data/zone_avg_water_temp-",z,"_zn.csv", sep="")
 data_T<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
 
 BBN_input_demogModel<-data.frame(year=year_range,A_z_t=data_A_yearavg, W_z_t=W_zone)
-BBN_input_virusModel<-data.frame(year=year_range, S_z_t=data_S_switch, T_z_t=data_T)
+BBN_input_virusModel<-data.frame(year=year_range, S_z_t=data_S_switch, T_z_t=data_T$avg_est_watertemp)
 ##### read in the initial population based on the zone
 inputfile<-"initial_population_sizes.xlsx"
 data<-as.data.frame(read_excel(inputfile, sheet = 1, col_names = TRUE, col_types = NULL, na = "", skip = 0))

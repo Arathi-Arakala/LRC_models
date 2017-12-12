@@ -55,13 +55,21 @@ CyHV3_5AgeClasses<-function(t, State, Pars){
     for(i in 1:5){
       
       if(i==1){
-        dS[i]=-S[i]*(beta_mx[,i]%*%(I+ L + A  ) ) -mu_mx[i]*S[i] - c_mx[i]*(Total[i]*sum(Total))
-        dE[i]=S[i]*(beta_mx[,i]%*%(I+ L + A  ) )- eta*E[i] -mu_mx[i]*E[i] - c_mx[i]*(Total[i]*sum(Total))
-        dI[i]=eta*E[i]-gamma*I[i] -mu_mx[i]*I[i] - c_mx[i]*(Total[i]*sum(Total))
-        dL[i]=f_1*gamma*I[i] + f_2*gamma*Z[i] - xi*A[i] -mu_mx[i]*L[i] - c_mx[i]*(Total[i]*sum(Total))
-        dA[i]=(1-f_1)*gamma*I[i]+(1-f_2)*gamma*Z[i]-sigma*L[i] -mu_mx[i]*A[i] - c_mx[i]*(Total[i]*sum(Total))
-        dZ[i]=sigma*L[i]-gamma*Z[i] -mu_mx[i]*Z[i] - c_mx[i]*(Total[i]*sum(Total))
-     
+        dS[i]=-S[i]*(beta_mx[,i]%*%(I+ L + A  ) ) -mu_mx[i]*S[i] - c_mx[i]*(S[i]*sum(Total))
+        dE[i]=S[i]*(beta_mx[,i]%*%(I+ L + A  ) )- eta*E[i] -mu_mx[i]*E[i] - c_mx[i]*(E[i]*sum(Total))
+        dI[i]=eta*E[i]-gamma*I[i] -mu_mx[i]*I[i] - c_mx[i]*(I[i]*sum(Total))
+        dL[i]=(1-f_1)*gamma*I[i]+(1-f_2)*gamma*Z[i]-sigma*L[i] -mu_mx[i]*L[i] - c_mx[i]*(L[i]*sum(Total))
+        dA[i]=f_1*gamma*I[i] + f_2*gamma*Z[i] - xi*A[i] -mu_mx[i]*A[i] - c_mx[i]*(A[i]*sum(Total))
+        dZ[i]=sigma*L[i]-gamma*Z[i] -mu_mx[i]*Z[i] - c_mx[i]*(Z[i]*sum(Total))
+        
+        # #only demography, no virus
+        # dS[i]=-mu_mx[i]*S[i] - c_mx[i]*(Total[i]*sum(Total))
+        # dE[i]=-mu_mx[i]*E[i] - c_mx[i]*(Total[i]*sum(Total))
+        # dI[i]=-mu_mx[i]*I[i] - c_mx[i]*(Total[i]*sum(Total))
+        # dA[i]=-mu_mx[i]*L[i] - c_mx[i]*(Total[i]*sum(Total))
+        # dL[i]=-mu_mx[i]*A[i] - c_mx[i]*(Total[i]*sum(Total))
+        # dZ[i]=-mu_mx[i]*Z[i] - c_mx[i]*(Total[i]*sum(Total))
+        # 
         if(E[i]==0 && dE[i]<0) dE[i]<-0
         if(I[i]==0 && dI[i]<0) dI[i]<-0
         if(L[i]==0 && dL[i]<0) dL[i]<-0
@@ -70,13 +78,20 @@ CyHV3_5AgeClasses<-function(t, State, Pars){
          }
       
       if(i==2){
-        dS[i]=-S[i]*(beta_mx[,i]%*%(I+ L + A  ) ) -mu_mx[i]*S[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
-        dE[i]=S[i]*(beta_mx[,i]%*%(I+ L + A  ) )- eta*E[i] -mu_mx[i]*E[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
-        dI[i]=eta*E[i]-gamma*I[i] -mu_mx[i]*I[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
-        dL[i]=f_1*gamma*I[i] + f_2*gamma*Z[i] - xi*A[i] -mu_mx[i]*L[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
-        dA[i]=(1-f_1)*gamma*I[i]+(1-f_2)*gamma*Z[i]-sigma*L[i] -mu_mx[i]*A[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
-        dZ[i]=sigma*L[i]-gamma*Z[i] -mu_mx[i]*Z[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
+        dS[i]=-S[i]*(beta_mx[,i]%*%(I+ L + A  ) ) -mu_mx[i]*S[i] - (c_mx[i]*(S[i]*sum(Total[-1]))*sens)
+        dE[i]=S[i]*(beta_mx[,i]%*%(I+ L + A  ) )- eta*E[i] -mu_mx[i]*E[i] - (c_mx[i]*(E[i]*sum(Total[-1]))*sens)
+        dI[i]=eta*E[i]-gamma*I[i] -mu_mx[i]*I[i] - (c_mx[i]*(I[i]*sum(Total[-1]))*sens)
+        dA[i]=f_1*gamma*I[i] + f_2*gamma*Z[i] - xi*A[i] -mu_mx[i]*A[i] - (c_mx[i]*(A[i]*sum(Total[-1]))*sens)
+        dL[i]=(1-f_1)*gamma*I[i]+(1-f_2)*gamma*Z[i]-sigma*L[i] -mu_mx[i]*L[i] - (c_mx[i]*(L[i]*sum(Total[-1]))*sens)
+        dZ[i]=sigma*L[i]-gamma*Z[i] -mu_mx[i]*Z[i] - (c_mx[i]*(Z[i]*sum(Total[-1]))*sens)
       
+        # dS[i]=-mu_mx[i]*S[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
+        # dE[i]=-mu_mx[i]*E[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
+        # dI[i]=-mu_mx[i]*I[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
+        # dL[i]=-mu_mx[i]*L[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
+        # dA[i]=-mu_mx[i]*A[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
+        # dZ[i]=-mu_mx[i]*Z[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
+        
         if(E[i]==0 && dE[i]<0) dE[i]<-0
         if(I[i]==0 && dI[i]<0) dI[i]<-0
         if(L[i]==0 && dL[i]<0) dL[i]<-0
@@ -85,13 +100,20 @@ CyHV3_5AgeClasses<-function(t, State, Pars){
         
         }
       if(i>2){
-        dS[i]=-S[i]*(beta_mx[,i]%*%(I+ L + A  ) ) -mu_mx[i]*S[i] 
-        dE[i]=S[i]*(beta_mx[,i]%*%(I+ L + A  ) )- eta*E[i] -mu_mx[i]*E[i] 
-        dI[i]=eta*E[i]-gamma*I[i] -mu_mx[i]*I[i] 
-        dL[i]=f_1*gamma*I[i] + f_2*gamma*Z[i] - xi*A[i] -mu_mx[i]*L[i] 
-        dA[i]=(1-f_1)*gamma*I[i]+(1-f_2)*gamma*Z[i]-sigma*L[i] -mu_mx[i]*A[i] 
-        dZ[i]=sigma*L[i]-gamma*Z[i] -mu_mx[i]*Z[i] 
+        dS[i]=-S[i]*(beta_mx[,i]%*%(I+ L + A  ) ) -mu_mx[i]*S[i]
+        dE[i]=S[i]*(beta_mx[,i]%*%(I+ L + A  ) )- eta*E[i] -mu_mx[i]*E[i]
+        dI[i]=eta*E[i]-gamma*I[i] -mu_mx[i]*I[i]
+        dA[i]=f_1*gamma*I[i] + f_2*gamma*Z[i] - xi*A[i] -mu_mx[i]*A[i]
+        dL[i]=(1-f_1)*gamma*I[i]+(1-f_2)*gamma*Z[i]-sigma*L[i] -mu_mx[i]*L[i]
+        dZ[i]=sigma*L[i]-gamma*Z[i] -mu_mx[i]*Z[i]
       
+        # dS[i]=-mu_mx[i]*S[i] 
+        # dE[i]=-mu_mx[i]*E[i] 
+        # dI[i]=-mu_mx[i]*I[i] 
+        # dL[i]=-mu_mx[i]*L[i] 
+        # dA[i]=-mu_mx[i]*A[i] 
+        # dZ[i]=-mu_mx[i]*Z[i] 
+        
         if(E[i]==0 && dE[i]<0) dE[i]<-0
         if(I[i]==0 && dI[i]<0) dI[i]<-0
         if(L[i]==0 && dL[i]<0) dL[i]<-0
