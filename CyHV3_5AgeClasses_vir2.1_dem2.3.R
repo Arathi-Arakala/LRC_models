@@ -2,7 +2,7 @@
 ####### Epi model with demography - 5 age classes #######
 #########################################################
 
-CyHV3_5AgeClasses<-function(t, State, Pars){
+CyHV3_5AgeClasses_vir2pt1_dem2pt3<-function(t, State, Pars){
   
   
   with(as.list(c(State, Pars)), {
@@ -21,6 +21,7 @@ CyHV3_5AgeClasses<-function(t, State, Pars){
     mu_mx<-Pars$mu_mx
     F_mx<-Pars$F_mx
     c_mx<-Pars$c_mx
+    A_zt<-Pars$A_zt
     sens<-Pars$sens
     
     
@@ -78,12 +79,14 @@ CyHV3_5AgeClasses<-function(t, State, Pars){
          }
       
       if(i==2){
-        dS[i]=-S[i]*(beta_mx[,i]%*%(I+ Z + A  ) ) -mu_mx[i]*S[i] - (c_mx[i]*(S[i]*sum(Total[-1]))*sens)
-        dE[i]=S[i]*(beta_mx[,i]%*%(I+ Z + A  ) )- eta*E[i] -mu_mx[i]*E[i] - (c_mx[i]*(E[i]*sum(Total[-1]))*sens)
-        dI[i]=eta*E[i]-gamma*I[i] -mu_mx[i]*I[i] - (c_mx[i]*(I[i]*sum(Total[-1]))*sens)
-        dA[i]=f_1*gamma*I[i] + f_2*gamma*Z[i] - xi*A[i] -mu_mx[i]*A[i] - (c_mx[i]*(A[i]*sum(Total[-1]))*sens)
-        dL[i]=(1-f_1)*gamma*I[i]+(1-f_2)*gamma*Z[i]-sigma*L[i] -mu_mx[i]*L[i] - (c_mx[i]*(L[i]*sum(Total[-1]))*sens)
-        dZ[i]=sigma*L[i]-gamma*Z[i] -mu_mx[i]*Z[i] - (c_mx[i]*(Z[i]*sum(Total[-1]))*sens)
+        scaleFactor<-1e06*(sum(Total[-1])/ (A_zt+1) )
+        #scaleFactor<-exp( (sum(Total[-1])/ (A_zt+1) )  )
+        dS[i]=-S[i]*(beta_mx[,i]%*%(I+ Z + A  ) ) -mu_mx[i]*S[i] - (c_mx[i]*(S[i]*scaleFactor ) *sens)# change made to equation for dem 2.3
+        dE[i]=S[i]*(beta_mx[,i]%*%(I+ Z + A  ) )- eta*E[i] -mu_mx[i]*E[i] - (c_mx[i]*(E[i]*scaleFactor )*sens)
+        dI[i]=eta*E[i]-gamma*I[i] -mu_mx[i]*I[i] - (c_mx[i]*(I[i]*scaleFactor )*sens)
+        dA[i]=f_1*gamma*I[i] + f_2*gamma*Z[i] - xi*A[i] -mu_mx[i]*A[i] - (c_mx[i]*(A[i]*scaleFactor)*sens)
+        dL[i]=(1-f_1)*gamma*I[i]+(1-f_2)*gamma*Z[i]-sigma*L[i] -mu_mx[i]*L[i] - (c_mx[i]*(L[i]*scaleFactor )*sens)
+        dZ[i]=sigma*L[i]-gamma*Z[i] -mu_mx[i]*Z[i] - (c_mx[i]*(Z[i]*scaleFactor )*sens)
       
         # dS[i]=-mu_mx[i]*S[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)
         # dE[i]=-mu_mx[i]*E[i] - (c_mx[i]*(Total[i]*sum(Total[-1]))*sens)

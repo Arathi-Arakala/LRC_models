@@ -50,7 +50,7 @@ spawnSuit_allZones<-numeric()
 temp_allZones<-numeric()
 init_allStates_mx<-matrix(0, nrow=8, ncol=30)
 
-VirusYear<-2
+VirusYear<-10
 VirusZone<-2 # Zone where virus is released
 VirusDay<-numeric()#stores the day that the virus is released.
 

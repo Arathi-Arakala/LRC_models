@@ -21,6 +21,8 @@ for(i in 1:length(data_A_yearavg)){
   data_A_yearavg[i]<-mean(data_A$adult_carp_number[range_b:range_e])
 }
 
+# make it deterministic for testing
+tmp1<-rep(mean(data_A_yearavg), length(data_A_yearavg))
 
 # 2. Read in W_z_t
 RiverArea_hectares<-c(839, 1703, 0, 1312, 492, 0, 85, 410)
@@ -29,7 +31,8 @@ data_W<-as.data.frame(read_excel(inputfile, sheet = 1, col_names = TRUE, col_typ
 data_W_zone<-data_W[which(data_W$zone==z),]
 W_zone<-(data_W_zone$p_wetland_area/4)+(data_W_zone$s_wetland_area/4)+(0.05*RiverArea_hectares[z])
 
-
+# make it deterministic for testing
+tmp2<-rep(mean(W_zone), times=length(W_zone))
 
 
 # 3. Spawning suitability
@@ -39,6 +42,10 @@ data_S_switch<-rep(0, times=length(data_S$rn))
 data_S_switch[which(data_S$rn==3)]<-1
 data_S_switch[which(data_S$rn==2)]<-1
 
+# make it deterministic for testing, turn off aggregation completely
+tmp3<-rep(0, times=length(data_S$rn))
+
+
 
 # 4. Temparature T_z_t
 inputfile<-paste("BBN_Data/zone_avg_water_temp-",z,"_zn.csv", sep="")
@@ -46,6 +53,12 @@ data_T<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
 
 BBN_input_demogModel<-data.frame(year=year_range,A_z_t=data_A_yearavg, W_z_t=W_zone)
 BBN_input_virusModel<-data.frame(month=month_range, S_z_t=data_S_switch, T_z_t=data_T$avg_est_watertemp)
+
+###make it deterministic
+BBN_input_demogModel<-data.frame(year=year_range,A_z_t=tmp1, W_z_t=tmp2)
+BBN_input_virusModel<-data.frame(month=month_range, S_z_t=tmp3, T_z_t=data_T$avg_est_watertemp)
+
+
 ##### read in the initial population based on the zone
 inputfile<-"initial_population_sizes.xlsx"
 data<-as.data.frame(read_excel(inputfile, sheet = 1, col_names = TRUE, col_types = NULL, na = "", skip = 0))

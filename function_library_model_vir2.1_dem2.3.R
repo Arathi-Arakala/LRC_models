@@ -144,9 +144,10 @@ scaleBeta<-function(beta_mx, zone){
 }
 
 
-### function to set the demog n virus parameters for model 2.1 ###########
+### function to set the demog 2.3 n virus parameters for model 2.1 ###########
 #### look at confluence site (activity 3.1) for this ######################
-set_parameters_model2pt1<-function(parameters_demog, parameters_virus, zone, month){
+#### Divide the total predicted age 1 carp by the model by A_z_t to scale c1 #################
+set_parameters_model_vir2pt1_dem2pt3<-function(parameters_demog, parameters_virus, zone, month, SF){
  
  #fit temp curve to the BBN data for the zone
  cosineParams<-getFittedTempCurve(zone, 1, 21,0) # start year =1, number of years = 21, noPlot
@@ -155,16 +156,17 @@ set_parameters_model2pt1<-function(parameters_demog, parameters_virus, zone, mon
  parameters_virus["c"]<-as.numeric(cosineParams$C)
  
  #set up beta_mx
+ #SF<-100
  beta_mx<-matrix(0, nrow=5, ncol=5)
- beta_mx[1, 1:2]<-0.0001
- beta_mx[2, 1:2]<-0.0001
- beta_mx[1,3:5]<-1e-06
- beta_mx[2, 3:5]<-1e-06
- beta_mx[3:5,1]<-1e-06
- beta_mx[3:5,2]<-1e-06
- beta_mx[3:5,3:5]<-1e-04
+ beta_mx[1, 1:2]<-0.0001*SF
+ beta_mx[2, 1:2]<-0.0001*SF
+ beta_mx[1,3:5]<-1e-06*SF
+ beta_mx[2, 3:5]<-1e-06*SF
+ beta_mx[3:5,1]<-1e-06*SF
+ beta_mx[3:5,2]<-1e-06*SF
+ beta_mx[3:5,3:5]<-1e-04*SF
  
- beta_mx<-1000*beta_mx # added on 18 Dec 2017 to vary beta
+ #beta_mx<-1*beta_mx # added on 18 Dec 2017 to vary beta
  beta_mx<-scaleBeta(beta_mx, zone)
  
  #aggregation efffect on adults only
@@ -175,7 +177,11 @@ set_parameters_model2pt1<-function(parameters_demog, parameters_virus, zone, mon
  beta_mx[1:2, 3:5]<-0
  beta_mx[3:5, 1:2]<-0
  
- parameters_model2pt1<-list(
+ #Adding the monthly Adult popuation predicted by BBN
+ A_z_t_pred<-data_A$adult_carp_number[month]
+ #A_z_t_pred<-0
+ 
+ parameters_model_vir2pt1_dem2pt3<-list(
    beta_mx=beta_mx,
    #copy all other parameters_virus
    a=parameters_virus["a"],
@@ -188,10 +194,12 @@ set_parameters_model2pt1<-function(parameters_demog, parameters_virus, zone, mon
    w_3=parameters_virus["w_3"],
    sigma=parameters_virus["sigma"],
    xi=parameters_virus["xi"],
+   
    #assign demography parameters
    mu_mx=as.matrix(parameters_demog[1:5]),
    F_mx=as.matrix(c(0,0,parameters_demog[6:8])),
    c_mx=as.matrix(parameters_demog[9:10]),
+   A_zt=A_z_t_pred,
    sens=parameters_demog["sens"]
 )
 }
@@ -199,4 +207,4 @@ set_parameters_model2pt1<-function(parameters_demog, parameters_virus, zone, mon
 #params<-set_parameters_model2pt1(parameters_demog, parameters_virus, 1)
 
 ### Demography and virus combined differential equations #######################
-source("CyHV3_5AgeClasses.R")
+source("CyHV3_5AgeClasses_vir2.1_dem2.3.R")

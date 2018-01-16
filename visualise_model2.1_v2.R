@@ -29,42 +29,43 @@ legend(1995, ylimit, c( "Wetland Area (tenths of hectares)"), lty=c(1), lwd=c(2.
 
 title(paste("Sub-catchment Prediction Zone ",zone, sep=""), outer=TRUE)
 
-
+  
 ############## plot number of S, E, I, A, L and Z  adult carp ##########
 
-S_adults<-output_all$`4`+output_all$`5`
-E_adults<-output_all$`9`+output_all$`10`
-I_adults<-output_all$`14`+output_all$`15`
-L_adults<-output_all$`19`+output_all$`20`
-A_adults<-output_all$`24`+output_all$`25`
-Z_adults<-output_all$`29`+output_all$`30`
+S_adults<-output_all$`3`+output_all$`4`+output_all$`5`
+E_adults<-output_all$`8`+output_all$`9`+output_all$`10`
+I_adults<-output_all$`13`+output_all$`14`+output_all$`15`
+L_adults<-output_all$`18`+output_all$`19`+output_all$`20`
+A_adults<-output_all$`23`+output_all$`24`+output_all$`25`
+Z_adults<-output_all$`28`+output_all$`29`+output_all$`30`
 
-range_days<-VirusDay:(VirusDay+365)
+virus_start<-(((VirusYear-1)*365)+1)
+range_days<-virus_start:(virus_start+365)
 A_max<-max(A_adults) # max number of ailing fish in a day.
 maxDay<-output_all$time[which(A_adults==A_max)][1] #Day when maximum fish die.
 totalDeath<-sum(A_adults[range_days])
-endOfPrimaryInfection<-VirusDay+(which(A_adults[maxDay:(VirusDay+365) ]<1)[1])
+endOfPrimaryInfection<-VirusDay+(which(A_adults[maxDay:(virus_start+365) ]<1)[1])
 
 
-quartz()
-par(mfrow=c(2,2), oma=c(0,0,2,0))
-ylimit<-max(max(S_adults), max(E_adults))
-plot(1994.333+output_all$time/365, S_adults, type="l", lwd=2, col=1, ylab="S and E Adult Carp", xlab="year", ylim=c(0,ylimit))
-lines(1994.333+output_all$time/365, E_adults, type="l", col=3)
-legend(1995, ylimit, c("Susc","Exposed"), lty=c(1,1), lwd=c(2.5,2.5),col=c(1,3))
-
-ylimit<-max(max(I_adults), max(Z_adults))
-plot(1994.333+output_all$time/365, I_adults, type="l", lwd=2, col=2,lty=1, ylab="Infected Adult Carp", xlab="year", ylim=c(0,ylimit))
-lines(1994.333+output_all$time/365, Z_adults, type="l", col=2, lty=2, lwd=2)
-legend(1995, ylimit, c("Infected","Secondary Infected"), lty=c(1,2), lwd=c(2.5,2.5),col=c(2,2))
-
-ylimit<-max(L_adults)
-plot(1994.333+output_all$time/365, L_adults, type="l", lwd=2, col=4,lty=1, ylab="Latent Adult Carp Numbers", xlab="year", ylim=c(0,ylimit))
-
-ylimit<-max(A_adults)
-plot(1994.333+output_all$time/365, A_adults, type="l", lwd=2, col=5,lty=1, ylab="Ailing Adult Carp Numbers", xlab="year", ylim=c(0,ylimit))
-
-title(paste("Sub-catchment Prediction Zone ",zone, sep=""), outer=TRUE)
+# quartz()
+# par(mfrow=c(2,2), oma=c(0,0,2,0))
+# ylimit<-max(max(S_adults), max(E_adults))
+# plot(1994.333+output_all$time/365, S_adults, type="l", lwd=2, col=1, ylab="S and E Adult Carp", xlab="year", ylim=c(0,ylimit))
+# lines(1994.333+output_all$time/365, E_adults, type="l", col=3)
+# legend(1995, ylimit, c("Susc","Exposed"), lty=c(1,1), lwd=c(2.5,2.5),col=c(1,3))
+# 
+# ylimit<-max(max(I_adults), max(Z_adults))
+# plot(1994.333+output_all$time/365, I_adults, type="l", lwd=2, col=2,lty=1, ylab="Infected Adult Carp", xlab="year", ylim=c(0,ylimit))
+# lines(1994.333+output_all$time/365, Z_adults, type="l", col=2, lty=2, lwd=2)
+# legend(1995, ylimit, c("Infected","Secondary Infected"), lty=c(1,2), lwd=c(2.5,2.5),col=c(2,2))
+# 
+# ylimit<-max(L_adults)
+# plot(1994.333+output_all$time/365, L_adults, type="l", lwd=2, col=4,lty=1, ylab="Latent Adult Carp Numbers", xlab="year", ylim=c(0,ylimit))
+# 
+# ylimit<-max(A_adults)
+# plot(1994.333+output_all$time/365, A_adults, type="l", lwd=2, col=5,lty=1, ylab="Ailing Adult Carp Numbers", xlab="year", ylim=c(0,ylimit))
+# 
+# title(paste("Sub-catchment Prediction Zone ",zone, sep=""), outer=TRUE)
 
 
 ######### zooming into ailing Adult Carp ################
@@ -95,3 +96,7 @@ title(paste("Sub-catchment Prediction Zone ",zone, sep=""), outer=TRUE)
 # abline(v=1994.33+endOfPrimaryInfection/365, col=10, lty=2)
 # title(paste("Virus Release Year in Zone ",zone, sep=""), outer=TRUE)
 # 
+
+
+
+
