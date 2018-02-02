@@ -55,37 +55,31 @@ parameters_virus <- c(beta=0.0001,
 # y=A_0+A_1*X_1+A_2*X_2
 ######################################################
 
-getFittedTempCurve<-function(zone, start_year, nYears, plotFlag ){
+getFittedTempCurve_newdata<-function(zone, start_year, nYears, plotFlag ){
   z<-zone
-  inputfile<-paste("BBN_Data/zone_avg_water_temp-",z,"_zn.csv", sep="")
-  data_T<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
+  inputfile<-paste("BBN_Data/RMIT_lw_weekly_v1_20180122.csv", sep="")
+  data_all<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
+  data_thiszone<-data_all[which(data_all$zone==z),]
+  data_T<-data_thiszone[,c(2,4,9,11)]
+  start_index<-which(data_T$iso_year==start_year)[1]
+  end_index<-which(data_T$iso_year==(start_year+nYears-1))[length(which(data_T$iso_year==(start_year+nYears-1)))]
+  #get the temp data
+  y=data_T$waterbody_avg_water_temp[start_index:end_index]
   
-  y=data_T$avg_est_watertemp
-  # calculating the indices of the first days of each month over the year
-  noOfDaysInAMonth<-c(31,28,31,30, 31, 30, 31, 31, 30, 31, 30, 31)
-  startDay<-1
-  firstDayOfMonths<-startDay
-  for(i in 1:(length(noOfDaysInAMonth)-1)  ){
-    nextMonth<-startDay+noOfDaysInAMonth[i]
-    firstDayOfMonths<-c(firstDayOfMonths, nextMonth )
-    startDay<-nextMonth
+  start_day<-((data_T$week_no[start_index])*7)-6
+  
+  # calculating the indices of the first days of each week over the years
+  week_day_indices<-start_day
+  for(i in 1:(end_index-start_index)){
+    newval<-week_day_indices[i]+7
+    week_day_indices<-c(week_day_indices, newval)
   }
-  # list out the indices of first day of month for 21 years
-  t_all<-numeric()
-  Nyears<-21
-  for(i in 1:Nyears){
-    t_all<-c(t_all, firstDayOfMonths+(365*(i-1)) )
-  }
-  
-  #select the time period
-  start_index<- ((start_year-1)*12)+1
-  end_index<-(start_index+(12*nYears))-1
-  
-  t<-t_all[start_index:end_index]
+  #get corresponding time values.
+  t<-week_day_indices
   
   X_1<-cos(2*pi*t/365)
   X_2<-sin(2*pi*t/365)
-  Temp_df<-data.frame(time=t, temp=y[start_index:end_index], X1=X_1, X2=X_2 )
+  Temp_df<-data.frame(time=t, temp=y, X1=X_1, X2=X_2 )
   
   sineWave<-lm(temp ~ time + X1+ X2, data=Temp_df)
   summary(sineWave)
@@ -123,9 +117,7 @@ getFittedTempCurve<-function(zone, start_year, nYears, plotFlag ){
     title(paste("Zone", z,": y=",round(A,2),"+",round(B,2), "*cos((2*pi*t/365) + ",round(C,2),")", sep=" "), outer=TRUE)
     
   }
-  if(plotFlag==1){
-       
-  }
+  
   
    
   
@@ -133,7 +125,7 @@ getFittedTempCurve<-function(zone, start_year, nYears, plotFlag ){
   
   
 }
-#cosineParams<-getFittedTempCurve(zone, 1, 21,1)
+#cosineParams<-getFittedTempCurve_newdata(zone, 2000, 17,1)
 
 #function to scale the beta matrix by the zone area in hectares. 
 # Zone Area taken from confluence site 
@@ -147,10 +139,10 @@ scaleBeta<-function(beta_mx, zone){
 ### function to set the demog 2.3 n virus parameters for model 2.1 ###########
 #### look at confluence site (activity 3.1) for this ######################
 #### Divide the total predicted age 1 carp by the model by A_z_t to scale c1 #################
-set_parameters_model_vir2pt1_dem2pt3<-function(parameters_demog, parameters_virus, zone, month, SF){
+set_parameters_model_vir2pt1_dem2pt3_newdata<-function(parameters_demog, parameters_virus, zone, week, SF){
  
  #fit temp curve to the BBN data for the zone
- cosineParams<-getFittedTempCurve(zone, 1, 21,0) # start year =1, number of years = 21, noPlot
+ cosineParams<-getFittedTempCurve_newdata(zone, 2000, 17,0) # start year =2000, number of years = 17, noPlot
  parameters_virus["a"]<-as.numeric(cosineParams$A)
  parameters_virus["b"]<-as.numeric(cosineParams$B)
  parameters_virus["c"]<-as.numeric(cosineParams$C)
@@ -170,7 +162,7 @@ set_parameters_model_vir2pt1_dem2pt3<-function(parameters_demog, parameters_viru
  beta_mx<-scaleBeta(beta_mx, zone)
  
  #aggregation efffect on adults only
- if(BBN_input_virusModel$S_z_t[month]==1)
+ if(BBN_input_virusModel$S_z_t[week]==1)
    beta_mx[3:5, 3:5]<-beta_mx[3:5, 3:5]*10
  
  #removing infection by Adults on YoY and Juv
@@ -180,8 +172,8 @@ set_parameters_model_vir2pt1_dem2pt3<-function(parameters_demog, parameters_viru
  #Adding the monthly Adult popuation predicted by BBN
  #A_z_t_pred<-data_A$adult_carp_number[month]
  #A_z_t_pred<-0
- if(m%%12==0) y<-m/12
- if(m%%12!=0) y<-floor(month/12)+1
+ if(week%%52==0) y<-(week/52) # y is the year index
+ if(week%%52!=0) y<-(floor(week/52)+1)
  A_z_t_pred<-BBN_input_demogModel$A_z_t[y]/10
  
  parameters_model_vir2pt1_dem2pt3<-list(

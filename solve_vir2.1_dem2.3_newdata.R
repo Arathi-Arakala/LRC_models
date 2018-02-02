@@ -1,4 +1,4 @@
-##### Monthly run #########
+##### Weekly run #########
 
   dt <- 1
   days<-7
@@ -23,7 +23,7 @@
     sensitivity<-sum(init[-1])/(adults_allZones[z,k]+1)
   
   parameters_demog<-set_parameters_model2pt3(wetland_change, strength, L, sensitivity)
-  parameters<-set_parameters_model_vir2pt1_dem2pt3(parameters_demog, parameters_virus, zone, w, SF)
+  parameters<-set_parameters_model_vir2pt1_dem2pt3_newdata(parameters_demog, parameters_virus, zone, w, SF)
   
   # dt <- 1
  # t <- seq(t_start,365*(k-1),dt)
