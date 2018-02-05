@@ -178,27 +178,27 @@ for(w in 1: runtime ){ # we start in the year 2000.End in Dec of the last but on
 
       if(v!=5){
         # this line added to create no migration across zones
-        output_migrated[,c(index_A2, index_A3, index_A4)]<-output_last[,c(index_A2, index_A3, index_A4)] #Force no migration
+       # output_migrated[,c(index_A2, index_A3, index_A4)]<-output_last[,c(index_A2, index_A3, index_A4)] #Force no migration
         
         # below lines are for migration
         #simultaneous update of all zones init
         #calculate outflow from each age class and virus class.
         #time is first col, A_0, A_1 have no outflow in any zone so those columns are 0
-        # outflow_allZones[,index_A2]<-output_last[,index_A2]*P_e # outflow of A_2 from all zones
-        # outflow_allZones[,index_A3]<-output_last[,index_A3]*P_e # outflow of A_3 from all zones
-        # outflow_allZones[,index_A4]<-output_last[,index_A4]*P_e # outflow of A_4 from all zones
-        # 
-        # ############
-        # #inflow of A_2, A_3, A_4 ageclass into each of the zones
-        # for(z in 1:8){
-        #   #amount remaining in zone z + amount flowing in from other zones
-        #   #A_2
-        #   output_migrated[z,index_A2]<- (output_last[,index_A2]*(1-P_e))[z] + sum( (M[z,]*outflow_allZones[,index_A2])[-z])
-        #   #A_3
-        #   output_migrated[z,index_A3]<- (output_last[,index_A3]*(1-P_e))[z] + sum( (M[z,]*outflow_allZones[,index_A3])[-z])
-        #   #A_4
-        #   output_migrated[z,index_A4]<- (output_last[,index_A4]*(1-P_e))[z] + sum( (M[z,]*outflow_allZones[,index_A4])[-z])
-        # }#end of z loop
+        outflow_allZones[,index_A2]<-output_last[,index_A2]*P_e # outflow of A_2 from all zones
+        outflow_allZones[,index_A3]<-output_last[,index_A3]*P_e # outflow of A_3 from all zones
+        outflow_allZones[,index_A4]<-output_last[,index_A4]*P_e # outflow of A_4 from all zones
+
+        ############
+        #inflow of A_2, A_3, A_4 ageclass into each of the zones
+        for(z in 1:8){
+          #amount remaining in zone z + amount flowing in from other zones
+          #A_2
+          output_migrated[z,index_A2]<- (output_last[,index_A2]*(1-P_e))[z] + sum( (M[z,]*outflow_allZones[,index_A2])[-z])
+          #A_3
+          output_migrated[z,index_A3]<- (output_last[,index_A3]*(1-P_e))[z] + sum( (M[z,]*outflow_allZones[,index_A3])[-z])
+          #A_4
+          output_migrated[z,index_A4]<- (output_last[,index_A4]*(1-P_e))[z] + sum( (M[z,]*outflow_allZones[,index_A4])[-z])
+        }#end of z loop
 
       }
 
