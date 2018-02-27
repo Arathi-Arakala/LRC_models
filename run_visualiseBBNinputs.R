@@ -8,6 +8,7 @@
 #################################################################
 setwd("/Users/Arathi/Documents/2018/RMIT/Research - CARP/CARP/LRC_models")
 library(deSolve); library(readxl)
+source("function_library_model_vir2.1_dem2.3_newdata.R")
 
 ###########################################################################
 #### Code to Read in and display BBN inputs from a specific zone z ########
@@ -87,7 +88,7 @@ library(deSolve); library(readxl)
 
 ################### READ IN new Data sent by Kerryne ############
 
-inputfile<-paste("BBN_Data/RMIT_lw_weekly_v1_20180122.csv", sep="")
+inputfile<-paste("BBN_Data/RMIT_lw_weekly_v2_20180206.csv", sep="")
 data_new<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
 
 # separate the zone data

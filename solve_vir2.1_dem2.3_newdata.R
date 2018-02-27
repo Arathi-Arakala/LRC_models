@@ -20,7 +20,9 @@
 
   
   # calculate sensitivity, the scaling factor for strength of density dependence
-    sensitivity<-sum(init[-1])/(adults_allZones[z,k]+1)
+  # use a smoothed version of the weekly BBN data, use smoothing window size = 26 weeks (approx 6 months)
+  smoothed_data<-smoothBBNdata(data_A_allZones[z,], 26, 0)
+    sensitivity<-sum(init[-1])/(smoothed_data[w]+1)
   
   parameters_demog<-set_parameters_model2pt3(wetland_change, strength, L, sensitivity)
   parameters<-set_parameters_model_vir2pt1_dem2pt3_newdata(parameters_demog, parameters_virus, zone, w, SF)

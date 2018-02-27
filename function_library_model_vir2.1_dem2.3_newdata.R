@@ -203,3 +203,35 @@ set_parameters_model_vir2pt1_dem2pt3_newdata<-function(parameters_demog, paramet
 
 ### Demography and virus combined differential equations #######################
 source("CyHV3_5AgeClasses_vir2.1_dem2.3.R")
+
+
+############ Function to smooth BBN output data for A_z_t #########
+#### inputs: data, width of windiw in num of weeks, 
+#### plot_flag=1 ensures a plot
+
+smoothBBNdata<-function(data_input, window_width, plot_flag){
+  smoothed_data<-rep(0, times=length(data_input))
+  for(i in (window_width/2):(length(data_input)-(window_width/2) ) ){
+    start_index<-(i-(window_width/2)+1)
+    end_index<-(start_index+window_width-1)
+    smoothed_data[i]<-mean(data_input[start_index:end_index])
+  }
+  if(plot_flag==1){
+    quartz()
+    plot(1:length(smoothed_data), smoothed_data, type='l', lwd=2, main=paste("window size =", window_width, sep=" "))
+    lines(1:length(smoothed_data), data_input, type='l', col=2)
+  }
+  smoothed_data
+  
+}
+
+# data_input<-data_A_allZones[2,]
+# window_width<-6
+# plot_flag<-1
+# smoothBBNdata(data_input, window_width, plot_flag)
+# 
+# for(w in seq(from = 26, to = 40, by=2) ){
+#   window_width<-w
+#   smoothBBNdata(data_input, window_width, plot_flag)
+#   
+# }

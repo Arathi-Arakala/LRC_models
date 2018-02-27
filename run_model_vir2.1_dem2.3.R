@@ -7,8 +7,8 @@ library(deSolve); library(readxl)
 source("function_library_model_vir2.1_dem2.3_newdata.R")
 
 ###### set strength of density dependence
-strength <- 1e-10 #can play around
-
+#strength <- 1e-9 #can play around
+strength<-10^-10.3
 ###### set severity of impact of shrinking wetland on survival or age0-2 fish
 q <- 2 #can play around
 
@@ -53,15 +53,15 @@ data_A_allZones<-numeric()
 init_allStates_mx<-matrix(0, nrow=8, ncol=30)
 
 #read the master input file
-inputfile<-paste("BBN_Data/RMIT_lw_weekly_v1_20180122.csv", sep="")
+inputfile<-paste("BBN_Data/RMIT_lw_weekly_v2_20180206.csv", sep="")
 data_new<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
 year_range<-range(data_new$iso_year)[1]:range(data_new$iso_year)[2]
 
 week_range<-1: ( length(data_new$week_no)/range(data_new$zone)[2] ) 
 runtime<-length(week_range)
 
-# VirusYear<-1999
-# SF<-1
+VirusYear<-1999
+SF<-1
 # release virus in first week of winter i.e. June
 VirusWeek<-21
 VirusZone<-2 # Zone where virus is released
@@ -178,7 +178,7 @@ for(w in 1: runtime ){ # we start in the year 2000.End in Dec of the last but on
 
       if(v!=5){
         # this line added to create no migration across zones
-       # output_migrated[,c(index_A2, index_A3, index_A4)]<-output_last[,c(index_A2, index_A3, index_A4)] #Force no migration
+      #  output_migrated[,c(index_A2, index_A3, index_A4)]<-output_last[,c(index_A2, index_A3, index_A4)] #Force no migration
         
         # below lines are for migration
         #simultaneous update of all zones init
@@ -201,7 +201,7 @@ for(w in 1: runtime ){ # we start in the year 2000.End in Dec of the last but on
         }#end of z loop
 
       }
-
+    
 
     }#end of v loop
 
@@ -389,106 +389,111 @@ for(w in 1: runtime ){ # we start in the year 2000.End in Dec of the last but on
 #     
 # }
 
-# PLOT 2: ##################################
-### plot to compare with bbn result ###########
-#create the equivalent x-axis values for bbn output
-
-
-
-
-adults_ailing_flag<-0 # if flag=1, display ailing carp. If flag=0 display total adult carp.
-quartz()
-par(mfrow=c(3,3), oma=c(0,0,2,0))
-
-for(z in 1:8){
-  output_all<-numeric()
-  wetland<-wetland_allZones[z,]
-  zone<-z
-  if(z==1)
-    output_all<-output_all_zone1
-  if(z==2)
-    output_all<-output_all_zone2
-  if(z==3)
-    output_all<-output_all_zone3
-  if(z==4)
-    output_all<-output_all_zone4
-  if(z==5)
-    output_all<-output_all_zone5
-  if(z==6)
-    output_all<-output_all_zone6
-  if(z==7)
-    output_all<-output_all_zone7
-  if(z==8)
-    output_all<-output_all_zone8
-
-  A_2<-output_all$`3`+output_all$`8`+output_all$`13`+output_all$`18`+output_all$`23`+output_all$`28`
-  A_3<-output_all$`4`+output_all$`9`+output_all$`14`+output_all$`19`+output_all$`24`+output_all$`29`
-  A_4<-output_all$`5`+output_all$`10`+output_all$`15`+output_all$`20`+output_all$`25`+output_all$`30`
-
-  bbn_data<-rep(data_A_allZones[z,], times=1, each=7)[1:dim(output_all)[1]]
-
-
-  A_adults<-output_all$`23`+output_all$`24`+output_all$`25`
-  virus_start<-(((VirusYear-1)*365)+1)
-  range_days<-virus_start:(virus_start+365)
-  A_max<-max(A_adults) # max number of ailing fish in a day.
-  maxDay<-output_all$time[which(A_adults==A_max)][1] #Day when maximum fish die.
-  maxYear<-floor(maxDay/365) #year when max fish are ailing.
-  range_days_2<-(((maxYear-1)*365)+1):(maxYear*365)
-  out_of_range<-which(range_days_2>length(A_adults))
-  if(length(out_of_range>0))
-    range_days_2<-range_days_2[-out_of_range]
-
-  totalDeath<-sum(A_adults[range_days_2])
-  endOfPrimaryInfection<-VirusDay+(which(A_adults[maxDay:(virus_start+365) ]<1)[1])
-
-  if(adults_ailing_flag==0){
-    ylimit<-max(MaxAdults, max(bbn_data))
-
-    if(z==1 || z==2 || z==3 || z==4){
-      plot(2000+output_all$time/365, A_2+A_3+A_4, type="l", lwd=2, col=1, ylab="Adult Carp Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
-      abline(v=2000+VirusDay/365, col=2, lty=2, lwd=2)
-      text(x=2000+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
-      lines(2000+output_all$time/365,bbn_data , lty=1, lwd=2, col="blue")
-    }
-    if(z==5){
-      plot(0, type="n", axes=F, xlab="", ylab="", ylim=c(0,5), xlim=c(0,5))
-      text(x=2.5, y=2.5, paste("SF = ", SF, sep=""), cex=1.5, pos=3)
-    }
-    if(z==5 || z==6 || z==7 || z==8){
-      plot(2000+output_all$time/365, A_2+A_3+A_4, type="l", lwd=2, col=1, ylab="Adult Carp Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
-      abline(v=2000+VirusDay/365, col=2, lty=2, lwd=2)
-      text(x=2000+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
-      lines(2000+output_all$time/365, bbn_data, lty=1, lwd=2, col="blue")
-
-    }
-
-
-  }
-  if(adults_ailing_flag==1){
-    ylimit<-MaxAiling
-    if(z==1 || z==2 || z==3 || z==4){
-      plot(1994.333+output_all$time/365, A_adults, type="l", lwd=2, col=1, ylab="Ailing Adult Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
-      abline(v=1994.333+VirusDay/365, col=2, lty=2, lwd=2)
-      text(x=1994.333+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
-      text(x=2010, y=3*ylimit/4, paste("Ailing_maxYear  =", round(totalDeath), sep=""), pos=1)
-    }
-    if(z==5){
-      plot(0, type="n", axes=F, xlab="", ylab="", ylim=c(0,5), xlim=c(0,5))
-      text(x=2.5, y=2.5, "Case 2 - 2003, zone 2, with aggregation", cex=1.5, pos=3)
-    }
-    if(z==5 || z==6 || z==7 || z==8){
-      plot(1994.333+output_all$time/365, A_adults, type="l", lwd=2, col=1, ylab="Ailing Adult Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
-      abline(v=1994.333+VirusDay/365, col=2, lty=2, lwd=2)
-      text(x=1994.333+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
-      text(x=2010, y=3*ylimit/4, paste("Ailing_maxYear =", round(totalDeath), sep=""), pos=1)
-
-    }
-
-
-  }
-
-}
+# # PLOT 2: ##################################
+# ### plot to compare with bbn result ###########
+# #create the equivalent x-axis values for bbn output
+# 
+# 
+# 
+# 
+# adults_ailing_flag<-0 # if flag=1, display ailing carp. If flag=0 display total adult carp.
+# quartz()
+# par(mfrow=c(3,3), oma=c(0,0,2,0))
+# 
+# for(z in 1:8){
+#   output_all<-numeric()
+#   wetland<-wetland_allZones[z,]
+#   zone<-z
+#   if(z==1)
+#     output_all<-output_all_zone1
+#   if(z==2)
+#     output_all<-output_all_zone2
+#   if(z==3)
+#     output_all<-output_all_zone3
+#   if(z==4)
+#     output_all<-output_all_zone4
+#   if(z==5)
+#     output_all<-output_all_zone5
+#   if(z==6)
+#     output_all<-output_all_zone6
+#   if(z==7)
+#     output_all<-output_all_zone7
+#   if(z==8)
+#     output_all<-output_all_zone8
+# 
+#   A_2<-output_all$`3`+output_all$`8`+output_all$`13`+output_all$`18`+output_all$`23`+output_all$`28`
+#   A_3<-output_all$`4`+output_all$`9`+output_all$`14`+output_all$`19`+output_all$`24`+output_all$`29`
+#   A_4<-output_all$`5`+output_all$`10`+output_all$`15`+output_all$`20`+output_all$`25`+output_all$`30`
+# 
+#   bbn_data<-rep(data_A_allZones[z,], times=1, each=7)[1:dim(output_all)[1]]
+#   smooth_bbn<-smoothBBNdata(data_A_allZones[z,],26,0)
+#   smooth_bbn_data<-rep(smooth_bbn, times=1, each=7)[1:dim(output_all)[1]]
+# 
+# 
+#   A_adults<-output_all$`23`+output_all$`24`+output_all$`25`
+#   virus_start<-(((VirusYear-1)*365)+1)
+#   range_days<-virus_start:(virus_start+365)
+#   A_max<-max(A_adults) # max number of ailing fish in a day.
+#   maxDay<-output_all$time[which(A_adults==A_max)][1] #Day when maximum fish die.
+#   maxYear<-floor(maxDay/365) #year when max fish are ailing.
+#   range_days_2<-(((maxYear-1)*365)+1):(maxYear*365)
+#   out_of_range<-which(range_days_2>length(A_adults))
+#   if(length(out_of_range>0))
+#     range_days_2<-range_days_2[-out_of_range]
+# 
+#   totalDeath<-sum(A_adults[range_days_2])
+#   endOfPrimaryInfection<-VirusDay+(which(A_adults[maxDay:(virus_start+365) ]<1)[1])
+# 
+#   if(adults_ailing_flag==0){
+#     #ylimit<-max(MaxAdults, max(bbn_data))
+#     ylimit<-max(max(A_2+A_3+A_4), max(smooth_bbn_data))
+#     if(z==1 || z==2 || z==3 || z==4){
+#       plot(2000+output_all$time/365, A_2+A_3+A_4, type="l", lwd=2, col=1, ylab="Adult Carp Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
+#       abline(v=2000+VirusDay/365, col=2, lty=2, lwd=2)
+#       text(x=2000+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
+#       #lines(2000+output_all$time/365,bbn_data , lty=1, lwd=2, col="blue")
+#       lines(2000+output_all$time/365, smooth_bbn_data, lty=2, lwd=2, col="orange")
+#     }
+#     if(z==5){
+#       plot(0, type="n", axes=F, xlab="", ylab="", ylim=c(0,5), xlim=c(0,5))
+#      # text(x=2.5, y=2.5, paste("density dep = ", strength, sep=""), cex=1.5, pos=3)
+#       text(x=2.5, y=2.5, paste("beta SF = ", SF, sep=""), cex=1.5, pos=3)
+#     }
+#     if(z==5 || z==6 || z==7 || z==8){
+#       plot(2000+output_all$time/365, A_2+A_3+A_4, type="l", lwd=2, col=1, ylab="Adult Carp Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
+#       abline(v=2000+VirusDay/365, col=2, lty=2, lwd=2)
+#       text(x=2000+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
+#       #lines(2000+output_all$time/365, bbn_data, lty=1, lwd=2, col="blue")
+#       lines(2000+output_all$time/365, smooth_bbn_data, lty=2, lwd=2, col="orange")
+# 
+#     }
+# 
+# 
+#   }
+#   if(adults_ailing_flag==1){
+#     ylimit<-MaxAiling
+#     if(z==1 || z==2 || z==3 || z==4){
+#       plot(1994.333+output_all$time/365, A_adults, type="l", lwd=2, col=1, ylab="Ailing Adult Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
+#       abline(v=1994.333+VirusDay/365, col=2, lty=2, lwd=2)
+#       text(x=1994.333+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
+#       text(x=2010, y=3*ylimit/4, paste("Ailing_maxYear  =", round(totalDeath), sep=""), pos=1)
+#     }
+#     if(z==5){
+#       plot(0, type="n", axes=F, xlab="", ylab="", ylim=c(0,5), xlim=c(0,5))
+#       text(x=2.5, y=2.5, "Case 2 - 2003, zone 2, with aggregation", cex=1.5, pos=3)
+#     }
+#     if(z==5 || z==6 || z==7 || z==8){
+#       plot(1994.333+output_all$time/365, A_adults, type="l", lwd=2, col=1, ylab="Ailing Adult Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
+#       abline(v=1994.333+VirusDay/365, col=2, lty=2, lwd=2)
+#       text(x=1994.333+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
+#       text(x=2010, y=3*ylimit/4, paste("Ailing_maxYear =", round(totalDeath), sep=""), pos=1)
+# 
+#     }
+# 
+# 
+#   }
+# 
+# }
 
 ##### PLOT 3: ################################################
 ### plot to determine the number in diff classes of adult carp.
@@ -632,3 +637,93 @@ for(z in 1:8){
 #  title(paste("SF = ", SF, sep=""), outer=TRUE)
 # 
 # 
+
+
+################# PLOT 4 : #############################
+##################################
+### 1. plot to show the inputs used in the demography model : smoothed bbn data and wetland area ###########
+### 2. Then add in the model output.
+
+
+
+quartz()
+par(mfrow=c(3,3), oma=c(0,0,2,0))
+
+for(z in 1:8){
+  output_all<-numeric()
+  wetland<-wetland_allZones[z,]
+  zone<-z
+  if(z==1)
+    output_all<-output_all_zone1
+  if(z==2)
+    output_all<-output_all_zone2
+  if(z==3)
+    output_all<-output_all_zone3
+  if(z==4)
+    output_all<-output_all_zone4
+  if(z==5)
+    output_all<-output_all_zone5
+  if(z==6)
+    output_all<-output_all_zone6
+  if(z==7)
+    output_all<-output_all_zone7
+  if(z==8)
+    output_all<-output_all_zone8
+  
+  A_2<-output_all$`3`+output_all$`8`+output_all$`13`+output_all$`18`+output_all$`23`+output_all$`28`
+  A_3<-output_all$`4`+output_all$`9`+output_all$`14`+output_all$`19`+output_all$`24`+output_all$`29`
+  A_4<-output_all$`5`+output_all$`10`+output_all$`15`+output_all$`20`+output_all$`25`+output_all$`30`
+  
+  bbn_data<-rep(data_A_allZones[z,], times=1, each=7)[1:dim(output_all)[1]]
+  smooth_bbn<-smoothBBNdata(data_A_allZones[z,],26,0)
+  smooth_bbn_data<-rep(smooth_bbn, times=1, each=7)[1:dim(output_all)[1]]
+  
+  
+  A_adults<-output_all$`23`+output_all$`24`+output_all$`25`
+  virus_start<-(((VirusYear-1)*365)+1)
+  range_days<-virus_start:(virus_start+365)
+  A_max<-max(A_adults) # max number of ailing fish in a day.
+  maxDay<-output_all$time[which(A_adults==A_max)][1] #Day when maximum fish die.
+  maxYear<-floor(maxDay/365) #year when max fish are ailing.
+  range_days_2<-(((maxYear-1)*365)+1):(maxYear*365)
+  out_of_range<-which(range_days_2>length(A_adults))
+  if(length(out_of_range>0))
+    range_days_2<-range_days_2[-out_of_range]
+  
+  totalDeath<-sum(A_adults[range_days_2])
+  endOfPrimaryInfection<-VirusDay+(which(A_adults[maxDay:(virus_start+365) ]<1)[1])
+  
+    #ylimit<-max(MaxAdults, max(bbn_data))
+    ylimit<-max(max(A_2+A_3+A_4), max(smooth_bbn_data))
+    ylimit<-max(ylimit/100, max(wetland))
+    nonzeroIndex<-which(smooth_bbn_data>0)[1]
+    if(z==1 || z==2 || z==3 || z==4){
+      #plot(2000+output_all$time/365, A_2+A_3+A_4, type="l", lwd=2, col=1, ylab="Adult Carp Numbers", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
+      plot((2000+output_all$time/365)[-(1:nonzeroIndex)], (smooth_bbn_data/100)[-(1:nonzeroIndex)], type='l', lty=2, lwd=2, col="orange", ylab="BBN inputs", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
+      abline(v=2000+VirusDay/365, col=2, lty=2, lwd=2)
+      text(x=2000+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
+      lines(2000:2016, wetland, type='h', col="red", lwd=2)
+      #lines(2000+output_all$time/365, (A_2+A_3+A_4)/100, type='l', col=1, lwd=2)
+      #legend(x=2000, y=ylimit-100, legend=c("BBN adult numbers (in 100s)", "wetland"),col=c("orange", "red"), lty=c(2,1) )
+    }
+    if(z==5){
+      plot(0, type="n", axes=F, xlab="", ylab="", ylim=c(0,5), xlim=c(0,5))
+      # text(x=2.5, y=2.5, paste("density dep = ", strength, sep=""), cex=1.5, pos=3)
+      text(x=2.5, y=2.5, paste(" "), cex=1.5, pos=3)
+      legend(x=0.2, y=3, legend=c("BBN adult numbers (in 100s)", "wetland"),col=c("orange", "red"), lty=c(2,1) )
+      
+    }
+    if(z==5 || z==6 || z==7 || z==8){
+      plot((2000+output_all$time/365)[-(1:nonzeroIndex)], (smooth_bbn_data/100)[-(1:nonzeroIndex)], type='l', lty=2, lwd=2, col="orange", ylab="BBN inputs", xlab="year", ylim=c(0,ylimit), main=paste("zone", z, sep=" "))
+      abline(v=2000+VirusDay/365, col=2, lty=2, lwd=2)
+      text(x=2000+VirusDay/365, y=0, "Virus Released", pos=2, cex=1)
+      lines(2000:2016, wetland, type='h', col="red", lwd=2)
+      #lines(2000+output_all$time/365, (A_2+A_3+A_4)/100, type='l', col=1, lwd=2)
+      #legend(x=2000, y=ylimit-100, legend=c("BBN adult numbers (in 100s)", "wetland"),col=c("orange", "red"), lty=c(2,1) )
+      
+      
+    }
+    
+    
+  
+}
