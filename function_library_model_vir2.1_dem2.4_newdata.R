@@ -135,9 +135,16 @@ getFittedTempCurve_newdata<-function(zone, start_year, nYears, plotFlag ){
 
 #function to scale the beta matrix by the zone area in hectares. 
 # Zone Area taken from confluence site 
-scaleBeta<-function(beta_mx, zone){
-  Area<-c(5906,16052, 2097, 35124, 6255, 6631, 20353, 53777)
-  beta_mx_new<-beta_mx/Area[zone]
+scaleBeta<-function(beta_mx, zone, w, data_habitat){
+   smooth_window<-4
+  
+  zone_index<-which(data_habitat$zone==zone)
+  data_zone_habitat<-data_habitat[zone_index,]
+  
+  smoothed_data_zone<-smoothBBNdata(data_zone_habitat$Tot_A,smooth_window,0)
+  zero_ind<-which(smoothed_data_zone==0)
+  smoothed_data_zone[zero_ind]<-0.000001
+  beta_mx_new<-beta_mx/smoothed_data_zone[w]
   beta_mx_new
 }
 
@@ -165,7 +172,7 @@ set_parameters_model_vir2pt1_dem2pt4_newdata<-function(parameters_demog, paramet
  beta_mx[3:5,3:5]<-1e-04*SF
  
  #beta_mx<-1*beta_mx # added on 18 Dec 2017 to vary beta
- beta_mx<-scaleBeta(beta_mx, zone)
+ beta_mx<-scaleBeta(beta_mx, zone, week, data_habitat)
  
  #aggregation efffect on adults only
  if(spawnSuit_allZones[zone,week]==1)
@@ -218,7 +225,7 @@ source("CyHV3_5AgeClasses_vir2.1_dem2.4.R")
 
 
 ############ Function to smooth BBN output data for A_z_t #########
-#### inputs: data, width of windiw in num of weeks, 
+#### inputs: time series data, width of windiw in num of weeks, 
 #### plot_flag=1 ensures a plot
 
 smoothBBNdata<-function(data_input, window_width, plot_flag){
@@ -255,11 +262,18 @@ getOutputValues<-function(output_all, zone){
   A_adults<-output_all$`23`+output_all$`24`+output_all$`25`
   Z_adults<-output_all$`28`+output_all$`29`+output_all$`30`
   
+  stopDay<-((w_stop_index+1)+84)*7 # 8- weeks since the (w_stop_index+1). 
+  # w_stop_index is the last week in the year previous to virus release
+  # w_stop_index+1 is the first week of virus release year. We scan 78 weeks from there. Times 7, will give us the stop day.
+  stopIndex<-which(output_all$time==stopDay)[1]
+  
+  
+  
   VirusDay# is the virus release day of the year, where day 1 is the first day of year 2000.
   #virus_start<-(((VirusYear-1)*365)+1) #to get the start day in the year range beginning in 2000, helps with plotting
   startIndex<-which(A_adults>0)[1]
   
-  A_max<-max(A_adults[startIndex:(startIndex+365)]) # max number of ailing fish in a day in first season
+  A_max<-max(A_adults[startIndex:(stopIndex)]) # max number of ailing fish in a day in first season
   maxIndex<-which(A_adults==A_max)[1]
   maxDay<-output_all$time[maxIndex][1] #Day when maximum fish die, where day 1 is first day of year 2000
   
@@ -267,9 +281,43 @@ getOutputValues<-function(output_all, zone){
   endIndex<-maxIndex+NumDaysToEnd
   endOfPrimaryInfection<-maxDay+NumDaysToEnd# Day when no more ailing fish.
   
-  totalDeath<-sum(A_adults[startIndex:(startIndex+365)])
-  timeToPeak<-maxIndex-startIndex
+  totalDeath<-sum(A_adults[startIndex:(stopIndex)])
+  #timeToPeak<-maxIndex-startIndex
+  timeToPeak<-maxDay-VirusDay
   
   list(maxDead=A_max, totalDead=totalDeath, delayToPeak=timeToPeak)
   
+}
+
+getAdultNumbers<-function(VirusZone){
+  output_all<-numeric()
+  if(VirusZone==1)
+    output_all<-output_all_zone1
+  if(VirusZone==2)
+    output_all<-output_all_zone2
+  if(VirusZone==3)
+  output_all<-output_all_zone3
+  if(VirusZone==4)
+    output_all<-output_all_zone4
+  if(VirusZone==5)
+    output_all<-output_all_zone5
+  if(VirusZone==6)
+    output_all<-output_all_zone6
+  if(VirusZone==7)
+    output_all<-output_all_zone7
+  if(VirusZone==8)
+    output_all<-output_all_zone8
+  
+  S_adults<-output_all$`3`+output_all$`4`+output_all$`5`
+  E_adults<-output_all$`8`+output_all$`9`+output_all$`10`
+  I_adults<-output_all$`13`+output_all$`14`+output_all$`15`
+  L_adults<-output_all$`18`+output_all$`19`+output_all$`20`
+  A_adults<-output_all$`23`+output_all$`24`+output_all$`25`
+  Z_adults<-output_all$`28`+output_all$`29`+output_all$`30`
+  
+  Total_adults<-S_adults+E_adults+I_adults+L_adults+A_adults+Z_adults
+  
+  rbind(output_all$time, Total_adults)
+  # quartz()
+  # plot(2000+(output_all$time/365), Total_adults, type='l', lwd=2)
 }

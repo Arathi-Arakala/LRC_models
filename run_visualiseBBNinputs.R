@@ -8,7 +8,7 @@
 #################################################################
 setwd("/Users/Arathi/Documents/2018/RMIT/Research - CARP/CARP/LRC_models")
 library(deSolve); library(readxl)
-source("function_library_model_vir2.1_dem2.3_newdata.R")
+source("function_library_model_vir2.1_dem2.4_newdata.R")
 
 ###########################################################################
 #### Code to Read in and display BBN inputs from a specific zone z ########
@@ -88,7 +88,9 @@ source("function_library_model_vir2.1_dem2.3_newdata.R")
 
 ################### READ IN new Data sent by Kerryne ############
 
-inputfile<-paste("BBN_Data/RMIT_lw_weekly_v2_20180206.csv", sep="")
+#inputfile<-paste("BBN_Data/RMIT_lw_weekly_v2_20180206.csv", sep="")
+inputfile<-paste("BBN_Data/RMIT_lw_weekly_v4_20180320.csv", sep="")
+
 data_new<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
 
 # separate the zone data
@@ -214,5 +216,37 @@ for(i in 1:5){
   }
   
   
+}
+
+#################################################################
+#### Read in weekly habitat area data ###########################
+inputfile<-paste("BBN_Data/RMIT_lw_weekly_v4_20180321_zoned_habitats_weekly.csv", sep="")
+data_habitat<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
+na_index<-which(is.na(data_habitat), arr.ind=TRUE)
+data_habitat[na_index]<-0
+smooth_window<-4
+quartz()
+par(mfrow=c(3,3))
+for(z in 1:8){
+  zone_index<-which(data_habitat$zone==z)
+  data_zone_habitat<-data_habitat[zone_index,]
+  newcol<-data_zone_habitat$yr+(data_zone_habitat$week/52)
+  data_zone_smoothed<-smoothBBNdata(data_zone_habitat$Tot_A,smooth_window,0)
+  
+  if(z<5){
+    plot(newcol, data_zone_habitat$Tot_A, type='l', lty=1, lwd=1.5, col="darkgreen", ylab="Area in ha", xlab="years")
+    lines(newcol, data_zone_smoothed, lty=2, lwd=2, col="darkblue")
+  }
+  if(z==5){
+    plot(0, type="n", axes=F, xlab="", ylab="", ylim=c(0,5), xlim=c(0,5))
+    text(x=2.5, y=2.5, paste("Zone Area, smooth window = ", smooth_window, sep=""), cex=1.5, pos=3)
+  }
+  if(z>=5){
+    plot(newcol, data_zone_habitat$Tot_A,type='l', lty=1, lwd=1.5, col="darkgreen", ylab="Area in ha", xlab="years")
+    lines(newcol, data_zone_smoothed, lty=2, lwd=2, col="darkblue")
+    
+  }
+  
+    
 }
 

@@ -62,7 +62,6 @@ source("weeklyRun_vir2.1_dem2.4_post.R") # RUN THE MODEL WEEKLY, virus is releas
 #   zone<-z
 #   if(z==1)
 #     output_all<-output_all_zone1
-# 
 #   if(z==2)
 #     output_all<-output_all_zone2
 #   if(z==3)
@@ -81,7 +80,7 @@ source("weeklyRun_vir2.1_dem2.4_post.R") # RUN THE MODEL WEEKLY, virus is releas
 #   ### visualise dynamics and behaviour
 #   plot_demography(output_all, zone, wetland)
 #   plotDiseaseClasses(output_all, zone, wetland)
-# 
+#   op<-as.data.frame(getOutputValues(output_all, zone))
 # }#end of z loop
 
 

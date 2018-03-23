@@ -34,7 +34,9 @@ for(w in (w_stop_index+1):runtime){
     init_allStates<-init_allStates_mx[z,] #initialise state vector
     
     if(zone==VirusZone && BBN_input_virusModel$year[w]==VirusYear && BBN_input_virusModel$week[w]==VirusWeek){
-      init_allStates[14]<-100 # release 100 infected age4 carp.
+     # init_allStates[14]<-100 # release 100 infected age4 carp.
+      init_allStates[9]<-100 # release 100 exposed age4 carp.
+      
       VirusDay<-t_start
     }
     #solve the differential equations, update output_all

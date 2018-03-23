@@ -5,7 +5,9 @@ MigrationFlag<-0 # 0 is turn off migration, 1 is turn it on
 ContRecruitmentFlag<-1 # Flag to indicate continuous recruitment implemented. Do not use the Leslie matrix mthod in this case
 
 ### run the model for all weeks until the year 2012, as we will release virus onlyin 2013.
-w_stop_index<-(which(data_new$iso_year>2012)[1]-1)/8 # last w for the run.
+#w_stop_index<-(which(data_new$iso_year>2012)[1]-1)/8 # last w for the run.
+w_stop_index<-(which(data_new$iso_year>(VirusYear-1))[1]-1)/8 # last w for the run.
+
 # for(w in 1:w_stop_index){
 #   year <-data_new$iso_year[w]
 # 
@@ -34,7 +36,8 @@ w_stop_index<-(which(data_new$iso_year>2012)[1]-1)/8 # last w for the run.
 #     init_allStates<-init_allStates_mx[z,] #initialise state vector
 # 
 #     if(zone==VirusZone && BBN_input_virusModel$year[w]==VirusYear && BBN_input_virusModel$week[w]==VirusWeek){
-#       init_allStates[14]<-100 # release 100 infected age4 carp.
+#       #init_allStates[14]<-100 # release 100 infected age4 carp.
+#       init_allStates[9]<-100 # release 100 exposed age4 carp.
 #       VirusDay<-t_start
 #     }
 #     #solve the differential equations, update output_all
@@ -216,7 +219,10 @@ w_stop_index<-(which(data_new$iso_year>2012)[1]-1)/8 # last w for the run.
 # }# end of w loop
 
 # save the data files
-outputfile<-"/Users/Arathi/Documents/2018/RMIT/Research - CARP/CARP/LRC_models/OutputData/preVirusReleaseData.Rdata"
-#save(init_allStates_mx, t_start, output_all_zone1, output_all_zone2, output_all_zone3, output_all_zone4, output_all_zone5, output_all_zone6, output_all_zone7, output_all_zone8,init_allZones,wetland_allZones,adults_allZones,spawnSuit_allZones, temp_allZones,data_A_allZones , file=outputfile)
+#outputfile<-"/Users/Arathi/Documents/2018/RMIT/Research - CARP/CARP/LRC_models/OutputData/preVirusReleaseData.Rdata"
+#outputfile<-"/Users/Arathi/Documents/2018/RMIT/Research - CARP/CARP/LRC_models/OutputData/preVirusReleaseData2012.Rdata"
+outputfile<-"/Users/Arathi/Documents/2018/RMIT/Research - CARP/CARP/LRC_models/OutputData/preVirusReleaseData2013_varyBeta.Rdata"
+
+#save(init_allStates_mx, t_start, output_all_zone1, output_all_zone2, output_all_zone3, output_all_zone4, output_all_zone5, output_all_zone6, output_all_zone7, output_all_zone8,init_allZones,wetland_allZones,adults_allZones,spawnSuit_allZones, temp_allZones,data_A_allZones,VirusDay, VirusYear , file=outputfile)
 load(outputfile)
 t_start_new<-t_start

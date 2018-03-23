@@ -53,13 +53,19 @@ week_range<-1: ( length(data_new$week_no)/range(data_new$zone)[2] )
 runtime<-length(week_range)
 
 #VirusYear<-2013
-#SF<-100
+#SF<-10^2
 # release virus in first week of spring i.e. Aug
 #VirusWeek<-32
-VirusZone<-2 # Zone where virus is released
+#VirusZone<-2 # Zone where virus is released
 VirusDay<-numeric()#stores the day that the virus is released.
 
 MaxAdults<-0 #max Adults across all zones
 MaxAiling<-0 #max ailing across all zones
 
 runtime<-length(week_range)-52 #counting number of weeks to run the loop for. We don't run the last year
+
+#read the habitat zone file
+inputfile<-paste("BBN_Data/RMIT_lw_weekly_v4_20180321_zoned_habitats_weekly.csv", sep="")
+data_habitat<-as.data.frame(read.csv(inputfile, header=TRUE, sep="," ))
+na_index<-which(is.na(data_habitat), arr.ind=TRUE)
+data_habitat[na_index]<-0

@@ -112,12 +112,21 @@ plotDiseaseClasses<-function(output_all, zone, wetland){
   L_adults<-output_all$`18`+output_all$`19`+output_all$`20`
   A_adults<-output_all$`23`+output_all$`24`+output_all$`25`
   Z_adults<-output_all$`28`+output_all$`29`+output_all$`30`
+  
+  stopDay<-((w_stop_index+1)+84)*7 # 84 weeks since the (w_stop_index+1)i.e. one and half years. 
+#  if(stopDay>length(A_adults)) stopDay<-length(A_adults)
+  # w_stop_index is the last week in the year previous to virus release
+  # w_stop_index+1 is the first week of virus release year. We scan 78 weeks from there. Times 7, will give us the stop day.
+  stopIndex<-which(output_all$time==stopDay)[1]
+  if(is.na(stopIndex)) stopIndex<-length(A_adults)
 
+  
+    
   VirusDay# is the virus release day of the year, where day 1 is the first day of year 2000.
   #virus_start<-(((VirusYear-1)*365)+1) #to get the start day in the year range beginning in 2000, helps with plotting
   startIndex<-which(A_adults>0)[1]
   
-  A_max<-max(A_adults[startIndex:(startIndex+365)]) # max number of ailing fish in a day in first season
+  A_max<-max(A_adults[startIndex:(stopIndex)]) # max number of ailing fish in a day in first season
   maxIndex<-which(A_adults==A_max)[1]
   maxDay<-output_all$time[maxIndex][1] #Day when maximum fish die, where day 1 is first day of year 2000
   
@@ -125,8 +134,9 @@ plotDiseaseClasses<-function(output_all, zone, wetland){
   endIndex<-maxIndex+NumDaysToEnd
   endOfPrimaryInfection<-maxDay+NumDaysToEnd# Day when no more ailing fish.
   
-  totalDeath<-sum(A_adults[startIndex:(startIndex+365)])
-  timeToPeak<-maxIndex-startIndex
+  totalDeath<-sum(A_adults[startIndex:(stopIndex)])
+  #timeToPeak<-maxIndex-startIndex
+  timeToPeak<-maxDay-VirusDay
   
   quartz()
   par(mfrow=c(3,2), oma=c(0,0,2,0))
@@ -162,19 +172,19 @@ plotDiseaseClasses<-function(output_all, zone, wetland){
   abline(v=2000+(endOfPrimaryInfection/365), col="red", lty=2)
   abline(v=2000+(maxDay/365), col="orange", lty=2)
   
+  spawnindex<-which(spawnSuit_allZones[zone,]==1)-(w_stop_index+1)
   quartz()
   par(mfrow=c(1,1), oma=c(0,0,2,0))
   xrange<-2000+output_all$time/365
-  plot(2000+output_all$time/365, A_adults, type="l", lwd=2, col=3, main="A", ylab="Numbers of fish", xlab="Year", ylim=c(0,max(A_adults)), xlim=c(2013,2015))
+  plot(2000+output_all$time/365, A_adults, type="l", lwd=2, col=3, main="A", ylab="Numbers of fish", xlab="Year", ylim=c(0,max(A_adults)), xlim=c(2013,2017))
   abline(v=2000+(VirusDay/365), col="red", lty=2)
-  abline(v=2000+(endOfPrimaryInfection/365), col="red", lty=2)
+  abline(v=2000+(stopDay/365), col="red", lty=2)
   abline(v=2000+(maxDay/365), col="orange", lty=2)
-  text(x=2000+(maxDay/365), y=A_max, paste("max death =", round(A_max,2), sep=""), pos=2)
+  text(x=2000+(maxDay/365), y=A_max, paste("max death =", round(A_max/5,2), sep=""), pos=2)
   text(x=2014, y=1, paste("time to maximum death =", timeToPeak, "days", sep=" "), pos=2)
-  text(x=2015, y=A_max, paste("total death =", round(totalDeath,2), sep=""), pos=4)
+  text(x=2014, y=A_max, paste("total death =", round(totalDeath/5,2), sep=""), pos=2)
   title(paste("beta SF = ", SF, "virus week = ", VirusWeek, sep=" "), outer=TRUE)
-  abline(v=2013+(46/52), col="brown", lty=4, lwd=2)
-  
+  abline(v=2013+(spawnindex/52), col="brown", lty=4, lwd=2)
 }
 
 plotHeatMap<-function(input_matrix, title){
@@ -200,9 +210,9 @@ plotHeatMap<-function(input_matrix, title){
 
   quartz()
   heatmap.2(mat_data,
-            cellnote = round(mat_data),  # same data set for cell labels
+            #cellnote = round(mat_data),  # same data set for cell labels
             main = title, # heat map title
-            notecol="black",      # change font color of cell labels to black
+            #notecol="black",      # change font color of cell labels to black
             density.info="none",  # turns off density plot inside color legend
             trace="none",         # turns off trace lines inside the heat map
             margins =c(12,9),     # widens margins around plot
@@ -213,4 +223,122 @@ plotHeatMap<-function(input_matrix, title){
             Colv="NA")            # turn off column clustering
   
  # dev.off()               # close the PNG device  
+}
+
+plotVirus<-function(op_adultCarp, VirusZone_range, S_range, output_time){
+  Area<-c(5906,16052, 2097, 35124, 6255, 6631, 20353, 53777)
+  carpWeight<-5 # in kgs
+  
+ # y_max<-(max(op_adultCarp)/2097)*carpWeight #using smallest area in den
+  quartz()
+  par(mfrow=c(4,2), oma=c(0,0,2,0))
+  for(v_z in 1:length(VirusZone_range)){
+    for(S in 1:length(S_range)){
+      y_max<-(max(op_adultCarp[v_z,S, ]/Area[v_z]))*carpWeight
+      if(S==1)
+       plot(2000+(output_time/365), (op_adultCarp[v_z,S, ]/Area[v_z])*carpWeight , type='l', lwd=1, col=S, main=paste("Zone ", VirusZone_range[v_z], sep=""), ylab="(carp kg/ha)", xlab="time", ylim=c(0, y_max))
+      if(S>1)
+        lines(2000+(output_time/365), (op_adultCarp[v_z,S, ]/Area[v_z])*carpWeight, lwd=1, col=S, lty=S)
+    }
+    abline(v=VirusYear, col="brown")
+   # legend(x=2014, y=max(op_adultCarp[v_z,,]/Area[v_z]), legend=as.character(S_range), col=1:length(S_range) )
+  }
+  
+  
+  
+  # quartz()
+  # plot(2000+(output_all$time/365),Total_adults, type='l', lwd=2,   )
+}
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+#library(scales)
+
+plotAdults_ggplot<-function(op_adultCarp, VirusZone_range, S_range, output_time, VirusDay){
+  library(ggplot2)
+  
+  
+  Area<-c(5906,16052, 2097, 35124, 6255, 6631, 20353, 53777)
+  carpWeight<-0.005 # in tonnes
+  maxCarpInd<-which(op_adultCarp==max(op_adultCarp), arr.ind=TRUE)[1,1]
+  y_max<-(max(op_adultCarp)/Area[maxCarpInd])*carpWeight #using smallest area in den
+  
+  f1<-NULL
+  f2<-NULL
+  f3<-NULL
+  f4<-NULL
+  f5<-NULL
+  f6<-NULL
+  f7<-NULL
+  f8<-NULL
+ 
+  for(v_z in 1:length(VirusZone_range)){
+    zone_op_adultCarp<-t(op_adultCarp[v_z,,])
+    df_adultCarp<-data.frame(t=2000+(output_time/365), y1=(zone_op_adultCarp[,1]/Area[v_z])*carpWeight, y2=(zone_op_adultCarp[,2]/Area[v_z])*carpWeight, y3=(zone_op_adultCarp[,3]/Area[v_z])*carpWeight, y4=(zone_op_adultCarp[,4]/Area[v_z])*carpWeight, y5=(zone_op_adultCarp[,5]/Area[v_z])*carpWeight )
+ 
+   f<-ggplot( df_adultCarp,aes(x=t))+ theme_grey(base_size = 15)+
+     theme(axis.text=element_text(size=10))+
+     geom_line(aes(x=t, y=y1, color=1), col=1, linetype=1)+
+     geom_line(aes(x=t, y=y2, color=2), col=2, linetype=2)+
+     geom_line(aes(x=t, y=y3, color=3), col=3, linetype=3)+
+     geom_line(aes(x=t, y=y4, color=4), col=4, linetype=4)+
+     geom_line(aes(x=t, y=y5, color=5), col=5, linetype=5)+
+     geom_vline(xintercept = 2000+(VirusDay/365), color="brown", lwd=0.3, lty=2)+
+     labs(x="time", y="Carp (tonnes/ha/day)" )+
+     scale_color_manual(name="", 
+                        values = c("y1"="#00ba38", "y2"="#00ba38", "y3"="#00ba38", "y4"="#00ba38", "y5"="#00ba38")) +  # line color
+     ggtitle(paste("Zone ", v_z, sep=""))+
+     scale_y_continuous(limits = c(0, y_max))
+   
+   if(v_z==1) f1<-f
+   if(v_z==2) f2<-f
+   if(v_z==3) f3<-f
+   if(v_z==4) f4<-f
+   if(v_z==5) f5<-f
+   if(v_z==6) f6<-f
+   if(v_z==7) f7<-f
+   if(v_z==8) f8<-f
+   
+     
+  }
+  #plot the 8 zones in a grid
+  quartz()
+  multiplot(f1, f2,f3, f4, cols=2)
+  quartz()
+  multiplot(f5, f6,f7, f8, cols=2)
+  
 }
